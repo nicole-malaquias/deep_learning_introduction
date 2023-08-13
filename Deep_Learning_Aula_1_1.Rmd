@@ -20,16 +20,19 @@ set.seed(0)
 ```{r}
 #Lê nossos dados de vinho
 data <- read.csv(file = "winequality-red.csv")
-data <- scale(data)
 
-#Train Test Split
+# deixando os dados menores, porque em redes neurais é preciso trabalhar com dados mais proximos de zero
+# porque redes neurais não são perfomaticas quando os numeros estão alto.
+data <- scale(data)  
+
+#Train Test Split, dividindo a base de dados em base de teste e treino.
 train_test_split_index <- 0.8 * nrow(data)
 
 train <- data.frame(data[1:train_test_split_index,])
-test <- data.frame(data[(train_test_split_index+1): nrow(data),])
+test <- data.frame(data[(train_test_split_index+1): nrow(data),]) # nada depois da virgula porque queremos de toda as colunas 
 
 #Padronizar dados para melhor performance
-train_x <- data.frame(train[1:11])
+train_x <- data.frame(train[1:11]) 
 train_y <- data.frame(train[12])
 
 test_x <- data.frame(test[1:11])
@@ -78,13 +81,12 @@ initializeParameters <- function(X, layer_size){
     n_x <- layer_size$n_x
     n_h <- layer_size$n_h
     n_y <- layer_size$n_y
-        
+    # runif chuta uma distribuição uniforme
     W1 <- matrix(runif(n_h * n_x), nrow = n_h, ncol = n_x, byrow = TRUE) * 0.01
     W2 <- matrix(runif(n_y * n_h), nrow = n_y, ncol = n_h, byrow = TRUE) * 0.01
     
     params <- list("W1" = W1,
                    "W2" = W2)
-    
     return (params)
 }
 ```
@@ -236,16 +238,21 @@ updateParameters <- function(grads, params, learning_rate){
 ```{r}
 trainModel <- function(X, y, num_iteration, hidden_neurons, lr){
     
-    layer_size <- getLayerSize(X, y, hidden_neurons)
-    init_params <- initializeParameters(X, layer_size)
+    layer_size <- getLayerSize(X, y, hidden_neurons) # cria arquitetura 
+    init_params <- initializeParameters(X, layer_size) # chuta os valores dos pesos 
     
-    cost_history <- c()
+    cost_history <- c() 
 
     for (i in 1:num_iteration) {
+				# fwd é onde verifica ativação 
         fwd_prop <- forwardPropagation(X, init_params, layer_size)
+				# pega o erro 
         cost <- computeCost(y, fwd_prop)
+				# recalcula os pesos 
         back_prop <- backwardPropagation(X, y, fwd_prop, init_params, layer_size)
-        update_params <- updateParameters(back_prop, init_params, learning_rate = lr)
+        #atualiza os pesos 
+				update_params <- updateParameters(back_prop, init_params, learning_rate = lr)
+				
         init_params <- update_params
         cost_history <- c(cost_history, cost)
         
